@@ -5,7 +5,10 @@
 
 package org.mozilla.focus;
 
+import android.Manifest;
 import android.arch.lifecycle.LiveData;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
 
@@ -20,6 +23,7 @@ import org.mozilla.focus.telemetry.TelemetryWrapper;
 import org.mozilla.focus.utils.AdjustHelper;
 import org.mozilla.focus.utils.AppConstants;
 import org.mozilla.focus.web.CleanupSessionObserver;
+import org.mozilla.focus.web.NetworkStatsObserver;
 
 import java.util.List;
 
@@ -45,6 +49,14 @@ public class FocusApplication extends LocaleAwareApplication {
         sessions.observeForever(new NotificationSessionObserver(this));
         sessions.observeForever(new TelemetrySessionObserver());
         sessions.observeForever(new CleanupSessionObserver(this));
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            throw new IllegalStateException("NetworkStatsObserver: requires Android M+");
+        } else if (checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            throw new IllegalStateException("NetworkStatsObserver: please open app info and add Phone permission");
+        } else {
+            sessions.observeForever(new NetworkStatsObserver(this));
+        }
     }
 
     public VisibilityLifeCycleCallback getVisibilityLifeCycleCallback() {
