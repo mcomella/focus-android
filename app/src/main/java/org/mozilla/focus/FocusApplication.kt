@@ -90,7 +90,7 @@ class FocusApplication : LocaleAwareApplication() {
                 EXPERIMENTS_BASE_URL, EXPERIMENTS_BUCKET_NAME, EXPERIMENTS_COLLECTION_NAME)
         fretboard = Fretboard(experimentSource, FlatFileExperimentStorage(experimentsFile))
         fretboard.loadExperiments()
-        WebViewProvider.determineEngine(this@FocusApplication)
+        WebViewProvider.determineEngine()
         launch(IO) {
             withTimeoutOrNull(FRETBOARD_BLOCKING_NETWORK_READ_TIMEOUT) {
                 fretboard.updateExperiments() // then update disk and memory from the network
